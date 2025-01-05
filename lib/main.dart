@@ -10,20 +10,30 @@ import 'package:flutter_sound/flutter_sound.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
-
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(MyApp());
   _requestMicrophonePermission(); // 请求麦克风权限
 }
 
+final _platform = const MethodChannel('samples.flutter.dev/permission');
 Future<void> _requestMicrophonePermission() async {
-  PermissionStatus status = await Permission.microphone.request();
-  if (status.isGranted) {
-    print("麦克风权限已获取");
-  } else {
-    print("麦克风权限被拒绝");
-  }
+  
+  // PermissionStatus status = await Permission.microphone.request();
+  // if (status.isGranted) {
+  //   print("麦克风权限已获取");
+  // } else {
+  //   print("麦克风权限被拒绝");
+  // }
+   String retStr;
+   try {
+     // 调用在HarmonyOS实现的权限申请函数
+     final int result = await _platform.invokeMethod<int>('requestPermissionsFromUser') as int;
+     retStr = "permission status: $result";
+   } on PlatformException catch (e) {
+     retStr = "Failed to request permission: '${e.message}'.";
+   }
 }
 
 class MyApp extends StatelessWidget {
